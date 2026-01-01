@@ -38,5 +38,44 @@ module.exports = {
         } catch (error) {
             strapi.log.error('Bootstrap error: could not create admin user', error);
         }
+
+        try {
+            // Set Public permissions for Post
+            const publicRole = await strapi.query('plugin::users-permissions.role').findOne({
+                where: { type: 'public' },
+            });
+
+            if (publicRole) {
+                const actionsToEnable = ['api::post.post.find', 'api::post.post.findOne'];
+                
+                const existingPermissions = await strapi.query('plugin::users-permissions.permission').findMany({
+                    where: {
+                        role: publicRole.id,
+                        action: {
+                            $in: actionsToEnable,
+                        },
+                    },
+                });
+
+                const existingActions = existingPermissions.map((p) => p.action);
+                const newActions = actionsToEnable.filter((action) => !existingActions.includes(action));
+
+                if (newActions.length > 0) {
+                    await Promise.all(
+                        newActions.map((action) =>
+                            strapi.query('plugin::users-permissions.permission').create({
+                                data: {
+                                    action,
+                                    role: publicRole.id,
+                                },
+                            })
+                        )
+                    );
+                    strapi.log.info('Public permissions for Post enabled');
+                }
+            }
+        } catch (error) {
+            strapi.log.error('Bootstrap error: could not set public permissions', error);
+        }
     },
 };
