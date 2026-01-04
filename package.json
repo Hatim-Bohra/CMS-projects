@@ -5,6 +5,7 @@
   "description": "Minimal Strapi v4 CMS",
   "scripts": {
     "develop": "strapi develop",
+    "dev": "strapi develop",
     "start": "strapi start",
     "build": "strapi build",
     "strapi": "strapi"

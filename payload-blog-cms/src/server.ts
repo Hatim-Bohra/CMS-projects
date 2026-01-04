@@ -23,6 +23,9 @@ const start = async () => {
         },
     });
 
+    // Serve static files
+    app.use(express.static('public'));
+
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, async () => {
         payload.logger.info(`Express is listening on port ${PORT}`);
